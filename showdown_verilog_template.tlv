@@ -24,9 +24,9 @@
                          /// Use "devel" or "demo". ("demo" will be used in competition.)
 
 
-   macro(team_220590277_module, ['
-      module team_220590277 (
-         //Inputs:
+   macro(team_209916212_module, ['
+      module team_209916212 (
+         // Inputs:
          input logic clk, input logic reset,
          input logic signed [7:0] x [m5_SHIP_RANGE], input logic signed [7:0] y [m5_SHIP_RANGE],   // Positions of your ships, as affected by last cycle's acceleration.
          input logic [7:0] energy [m5_SHIP_RANGE],   // The energy supply of each ship, as affected by last cycle's actions.
@@ -34,21 +34,14 @@
          input logic signed [7:0] enemy_x_p [m5_SHIP_RANGE], input logic signed [7:0] enemy_y_p [m5_SHIP_RANGE],   // Positions of enemy ships as affected by their acceleration last cycle.
          input logic [m5_SHIP_RANGE] enemy_cloaked,   // Whether the enemy ships are cloaked, in which case their enemy_x_p and enemy_y_p will not update.
          input logic [m5_SHIP_RANGE] enemy_destroyed, // Whether the enemy ships have been destroyed.
-          //Outputs:
+         // Outputs:
          output logic signed [3:0] x_a [m5_SHIP_RANGE], output logic signed [3:0] y_a [m5_SHIP_RANGE],  // Attempted acceleration for each of your ships; capped by max_acceleration (see showdown_lib.tlv).
          output logic [m5_SHIP_RANGE] attempt_fire, output logic [m5_SHIP_RANGE] attempt_shield, output logic [m5_SHIP_RANGE] attempt_cloak,  // Attempted actions for each of your ships.
          output logic [1:0] fire_dir [m5_SHIP_RANGE]   // Direction to fire (if firing). (For the first player: 0 = right, 1 = down, 2 = left, 3 = up)
       );
 
-      // Parameters defining the valid ranges of input/output values can be found near the top of "showdown_lib.tlv".
-
-      // /------------------------------\
-      // | Your Verilog logic goes here |
-      // \------------------------------/
-
-      // E.g.:
-  //ship0
- logic signed [7:0] val1 = -8'sd40;
+      //ship0
+    logic signed [7:0] val1 = -8'sd40;
     logic signed [7:0] val2 = 8'sd0;
     logic signed [7:0] val3 = 8'sd40;
    always_ff @(posedge clk or posedge reset) begin
@@ -127,12 +120,12 @@
                 y_a[0] <= 4'sd0;
             end
         end
-  end
+    end
   
   //ship2
    logic signed [7:0] val4 = -8'sd8;
-    logic signed [7:0] val5 = 8'sd0;
-    logic signed [7:0] val6 = -8'sd40;
+   logic signed [7:0] val5 = 8'sd0;
+   logic signed [7:0] val6 = -8'sd40;
    always_ff @(posedge clk or posedge reset) begin
         if (reset) begin
             x_a[2] <= 4'sd0;
@@ -242,19 +235,22 @@
                 x_a[2] <= -4'sd2;
                 y_a[2]<= -4'sd4;
             end
-        else if (x[2] ==-41 && y[2] ==-2) begin
+        else if (x[2] ==-37 && y[2] ==2) begin
                 x_a[2] <= 4'sd2;
-                y_a[2]<= 4'sd2;
+                y_a[2]<= -4'sd1;
+            end
+        else if (x[2] ==-41 && y[2] ==-17) begin
+                x_a[2] <= -4'sd3;
+                y_a[2]<= 4'sd0;
             end
        else begin
                 x_a[2] <= 4'sd0;
-                y_a[2] <= 4'sd0;
-           
+                y_a[2] <= 4'sd0;   
         end
   end
- 
-//ship1 
- logic signed [7:0] vals1 = -8'sd50;
+
+ //ship1 
+logic signed [7:0] vals1 = -8'sd50;
 logic signed [7:0] vals2 = 8'sd0;
 logic signed [7:0] vals3 = 8'sd50;
 
@@ -330,7 +326,7 @@ parameter int SHIELD_COST = 25;
 parameter int RECOUP_ENERGY = 15;
 parameter int MAX_ENERGY = 80;
 parameter int SHIP_FIRE_RANGE = 4;
-parameter int DANGER_PROXIMITY = 24;
+parameter int DANGER_PROXIMITY = 80;
 int dx;
 int dy;
 int manhattan;
@@ -347,7 +343,7 @@ always_latch begin
       	begin
         	for (int i = 0; i < SHIP_RANGE; i++) begin
             attempt_fire[i]   = 1'd0;
-            fire_dir[i]       = 2'bxx;
+            fire_dir[i]       = 2'b00;
 
             if (destroyed[i])
                 continue;
@@ -365,17 +361,17 @@ always_latch begin
                 if (manhattan <= DANGER_PROXIMITY)
                    enemy_nearby=1;
 
-                if (energy[i] >= FIRE_COST) begin
+                if (enemy_nearby && energy[i] >= FIRE_COST) begin
                     if (((dx>-16 && dx<16) && (dy >= -SHIP_FIRE_RANGE || dy <= SHIP_FIRE_RANGE)) || ((dy>-16 && dy<16) && (dx >= -SHIP_FIRE_RANGE || dx <= SHIP_FIRE_RANGE)) ) begin
-                        if (dx >= 0 && (dy>-16 && dy<16) )     begin fire_dir[i] <= 2'b00;attempt_fire[i] <= 1'b1;end  // left
-                        if (dx < 0 && (dy>-16 && dy<16) )begin fire_dir[i] <= 2'b10;attempt_fire[i] <= 1'b1;end  // right
-                        if (dy >= 0 && (dx>-16 && dx<16) )begin fire_dir[i] <= 2'b11;attempt_fire[i] <= 1'b1;end  // up
-                        if (dy < 0 && (dx>-16 && dx<16))begin fire_dir[i] <= 2'b01;attempt_fire[i] <= 1'b1; end // down
+                        if (dx >= 0 && (dy>-16 && dy<16) )     begin fire_dir[i] = 2'b00;attempt_fire[i] = 1'b1;end  // left
+                        if (dx < 0 && (dy>-16 && dy<16) )begin fire_dir[i] = 2'b10;attempt_fire[i] = 1'b1;end  // right
+                        if (dy >= 0 && (dx>-16 && dx<16) )begin fire_dir[i] = 2'b11;attempt_fire[i] = 1'b1;end  // up
+                        if (dy < 0 && (dx>-16 && dx<16))begin fire_dir[i] = 2'b01;attempt_fire[i] = 1'b1; end // down
                     	end
                 end
         		end
-    	end
- 	end
+    	  end
+ 	 end
 end
 
 //cloak and shield
@@ -396,22 +392,20 @@ always_latch begin
             enemy_nearby = 0;
 
             for (int j = 0; j < SHIP_RANGE; j++) begin
-                if (enemy_destroyed[j] || enemy_cloaked[j])
+                if ( enemy_cloaked[j])
                     continue;
 
                 dx = enemy_x_p[j] - x[i];
                 dy = enemy_y_p[j] - y[i];
-                manhattan = (dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy);
-                if ((manhattan <= DANGER_PROXIMITY) || (dx>-8 && dx<8)|| (dy>-8 && dy<8))begin
-                    enemy_nearby=1;end
-                if (enemy_nearby >= 1 && energy[i] >= SHIELD_COST && ((dx>-8 && dx<8) || (dy>-8 && dy<8) ) )begin
+                
+                if ( energy[i] >= SHIELD_COST && ((dx>-16 && dx<16) || (dy>-16 && dy<16) ) )begin
                 	attempt_shield[i] = 1'b1;end
-                if(energy[i] >= CLOAK_COST && !attempt_shield[i] &&  ((dx>-16 && dx<16)|| (dy>-16 && dy<16)))begin
+                if(energy[i] >= CLOAK_COST && !attempt_shield[i] &&  ((dx>-20 && dx<20)|| (dy>-20 && dy<20)))begin
                 		attempt_cloak[i] = 1'b1;end
                 
             end
     		end
-	end
+	 end
 end
 
 endmodule
@@ -424,7 +418,7 @@ endmodule
 
 // [Optional]
 // Visualization of your logic for each ship.
-\TLV team_220590277_viz(/_top, _team_num)
+\TLV team_209916212_viz(/_top, _team_num)
    m5+io_viz(/_top, _team_num)   /// Visualization of your IOs.
    \viz_js
       m5_DefaultTeamVizBoxAndWhere()
@@ -441,8 +435,8 @@ endmodule
       },
 
 
-\TLV team_220590277(/_top)
-   m5+verilog_wrapper(/_top, YOUR_GITHUB_ID)
+\TLV team_209916212(/_top)
+   m5+verilog_wrapper(/_top, 209916212)
 
 
 
@@ -457,18 +451,19 @@ endmodule
    // Your team as the first player. Provide:
    //   - your GitHub ID, (as in your \TLV team_* macro, above)
    //   - your team name--anything you like (that isn't crude or disrespectful)
-   m5_team(220590277, Stirs)
+   m5_team(209916212, fleetRON)
    
    // Choose your opponent.
    // Note that inactive teams must be commented with "///", not "//", to prevent M5 macro evaluation.
-  ///m5_team(random, Random)
-   ///m5_team(sitting_duck, Sitting Duck)\
+   ///m5_team(random, Random)
+   ///m5_team(sitting_duck, Sitting Duck)
+   ///m5_team(demo1, Test 1)
    
    
    // Instantiate the Showdown environment.
    m5+showdown(/top, /secret)
    
-   *passed = /secret$passed || *cyc_cnt > 600;   // Defines max cycles, up to ~600.
+   *passed = /secret$passed || *cyc_cnt > 100;   // Defines max cycles, up to ~600.
    *failed = /secret$failed;
 \SV
    endmodule
